@@ -21,6 +21,8 @@ namespace Quge.AuctionDataExport.Winform
 		private HSSFSheet moreSheet = null;
 		private HSSFSheet lessSheet = null;
 
+		private static int dataCount = 10000;
+
 		public Form1()
 		{
 			InitializeComponent();
@@ -63,6 +65,8 @@ namespace Quge.AuctionDataExport.Winform
 				return;
 			}
 
+			lblStateStr.Text = "导出中...";
+
 			var moreDataList = GetMoreDataList();
 			var lessDataList = GetLessDataList();
 			CreateMoreDataTableHeader(moreSheet);
@@ -71,6 +75,7 @@ namespace Quge.AuctionDataExport.Winform
 			LessDataHandle(lessDataList);
 
 			WriteXlsToFile(hssfworkbook, path);
+			lblStateStr.Text = "导出完成！";
 			MessageBox.Show("导出成功！");
 		}
 
@@ -81,7 +86,7 @@ namespace Quge.AuctionDataExport.Winform
 		private List<MoreDataModel> GetMoreDataList()
 		{
 			List<MoreDataModel> list = new List<MoreDataModel>();
-			for (int i = 0; i < 1000; i++)
+			for (int i = 0; i < dataCount; i++)
 			{
 				list.Add(new MoreDataModel()
 				{
@@ -108,7 +113,7 @@ namespace Quge.AuctionDataExport.Winform
 		private List<LessDataModel> GetLessDataList()
 		{
 			List<LessDataModel> list = new List<LessDataModel>();
-			for (int i = 0; i < 1000; i++)
+			for (int i = 0; i < dataCount; i++)
 			{
 				list.Add(new LessDataModel()
 				{
