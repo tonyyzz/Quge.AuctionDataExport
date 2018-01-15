@@ -1,5 +1,6 @@
 ﻿using NPOI.HSSF.UserModel;
 using Quge.AuctionDataExport.DAL;
+using Quge.AuctionDataExport.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -62,60 +63,163 @@ namespace Quge.AuctionDataExport.Winform
 				return;
 			}
 
+			var moreDataList = GetMoreDataList();
+			var lessDataList = GetLessDataList();
 			CreateMoreDataTableHeader(moreSheet);
 			CreateLessDataTableHeader(lessSheet);
-			MoreDataHandle();
-			LessDataHandle();
+			MoreDataHandle(moreDataList);
+			LessDataHandle(lessDataList);
 
 			WriteXlsToFile(hssfworkbook, path);
 			MessageBox.Show("导出成功！");
 		}
 
 		/// <summary>
+		/// moreData模拟数据
+		/// </summary>
+		/// <returns></returns>
+		private List<MoreDataModel> GetMoreDataList()
+		{
+			List<MoreDataModel> list = new List<MoreDataModel>();
+			for (int i = 0; i < 1000; i++)
+			{
+				list.Add(new MoreDataModel()
+				{
+					pId = $"10000{(i + 1).ToString().PadLeft(5, '0')}",
+					registTime = DateTime.Now.AddDays(-10).AddHours(i),
+					rechargeMoney = 100 + i,
+					firstRechargeTime = DateTime.Now.AddDays(-5).AddHours(i),
+					rechargeCount = 5 + i % 5,
+					firstAuctionGoodsTime = DateTime.Now.AddDays(-4).AddHours(i),
+					firstAuctionGoodsName = $"Goods{i.ToString().PadLeft(5, '0')}",
+					firstAuctionGoodsCount = 50 + i % 5,
+					lastLoginTime = DateTime.Now.AddDays(-4).AddHours(i),
+					isWinPrizeForTheGoods = i % 3 == 0 ? true : false,
+					channel = i % 3 == 0 ? "小米" : i % 3 == 1 ? "华为" : "vivo"
+				});
+			}
+			return list;
+		}
+
+		/// <summary>
+		/// lessData模拟数据
+		/// </summary>
+		/// <returns></returns>
+		private List<LessDataModel> GetLessDataList()
+		{
+			List<LessDataModel> list = new List<LessDataModel>();
+			for (int i = 0; i < 1000; i++)
+			{
+				list.Add(new LessDataModel()
+				{
+					pId = $"10000{(i + 1).ToString().PadLeft(5, '0')}",
+					auctionGoodsTime = DateTime.Now.AddDays(-4).AddHours(i),
+					auctionGoodsName = $"Goods{i.ToString().PadLeft(5, '0')}",
+					auctionCount = 50 + i % 5,
+					isWinPrizeForTheGoods = i % 3 == 0 ? true : false,
+				});
+			}
+			return list;
+		}
+
+		/// <summary>
 		/// MoreData导出
 		/// </summary>
-		private void MoreDataHandle()
+		private void MoreDataHandle(List<MoreDataModel> list)
 		{
-			var moreDataLi = AuctionDAL.MoreData();
-			int colNum = 11;
-			int dataNum = 10; //数据量
+			int dataNum = list.Count(); //数据量
 			HSSFSheet sheet = moreSheet;
 			HSSFRow row;
 			HSSFCell cell;
-			HSSFCellStyle celStyle = getCellStyle();
+			HSSFCellStyle cellStyle = getCellStyle();
+			HSSFCellStyle timeCellStyle = getTimeCellStyle();
 
 			for (int i = 0; i < dataNum; i++)
 			{
+				var item = list[i];
 				row = sheet.CreateRow(i + 1) as HSSFRow;
-				for (int j = 0; j < colNum; j++)
-				{
-					cell = row.CreateCell(j) as HSSFCell;
-					cell.CellStyle = celStyle;
-					cell.SetCellValue($"value{j}");
-				}
+
+				cell = row.CreateCell(0) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.pId);
+
+				cell = row.CreateCell(1) as HSSFCell;
+				cell.CellStyle = timeCellStyle;
+				cell.SetCellValue(item.registTime);
+
+				cell = row.CreateCell(2) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.rechargeMoney);
+
+				cell = row.CreateCell(3) as HSSFCell;
+				cell.CellStyle = timeCellStyle;
+				cell.SetCellValue(item.firstRechargeTime);
+
+				cell = row.CreateCell(4) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.rechargeCount);
+
+				cell = row.CreateCell(5) as HSSFCell;
+				cell.CellStyle = timeCellStyle;
+				cell.SetCellValue(item.firstAuctionGoodsTime);
+
+				cell = row.CreateCell(6) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.firstAuctionGoodsName);
+
+				cell = row.CreateCell(7) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.firstAuctionGoodsCount);
+
+				cell = row.CreateCell(8) as HSSFCell;
+				cell.CellStyle = timeCellStyle;
+				cell.SetCellValue(item.lastLoginTime);
+
+				cell = row.CreateCell(9) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.isWinPrizeForTheGoods ? "√" : "×");
+
+				cell = row.CreateCell(10) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.channel);
 			}
 		}
 		/// <summary>
 		/// LessData导出
 		/// </summary>
-		private void LessDataHandle()
+		private void LessDataHandle(List<LessDataModel> list)
 		{
-			int colNum = 5;
-			int dataNum = 10; //数据量
+			int dataNum = list.Count(); //数据量
 			HSSFSheet sheet = lessSheet;
 			HSSFRow row;
 			HSSFCell cell;
-			HSSFCellStyle celStyle = getCellStyle();
+			HSSFCellStyle cellStyle = getCellStyle();
+			HSSFCellStyle timeCellStyle = getTimeCellStyle();
 
 			for (int i = 0; i < dataNum; i++)
 			{
+				var item = list[i];
 				row = sheet.CreateRow(i + 1) as HSSFRow;
-				for (int j = 0; j < colNum; j++)
-				{
-					cell = row.CreateCell(j) as HSSFCell;
-					cell.CellStyle = celStyle;
-					cell.SetCellValue($"value{j}");
-				}
+
+				cell = row.CreateCell(0) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.pId);
+
+				cell = row.CreateCell(1) as HSSFCell;
+				cell.CellStyle = timeCellStyle;
+				cell.SetCellValue(item.auctionGoodsTime);
+
+				cell = row.CreateCell(2) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.auctionGoodsName);
+
+				cell = row.CreateCell(3) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.auctionCount);
+
+				cell = row.CreateCell(4) as HSSFCell;
+				cell.CellStyle = cellStyle;
+				cell.SetCellValue(item.isWinPrizeForTheGoods ? "√" : "×");
 			}
 		}
 
@@ -128,7 +232,7 @@ namespace Quge.AuctionDataExport.Winform
 			HSSFCellStyle celStyle = getCellStyle();
 			HSSFRow row = sheet.CreateRow(0) as HSSFRow;
 
-			sheet.SetColumnWidth(0, 10 * 256);
+			sheet.SetColumnWidth(0, 20 * 256);
 			var cell = row.CreateCell(0);
 			cell.SetCellValue("用户id");
 			cell.CellStyle = celStyle;
@@ -188,7 +292,7 @@ namespace Quge.AuctionDataExport.Winform
 			HSSFCellStyle celStyle = getCellStyle();
 			HSSFRow row = sheet.CreateRow(0) as HSSFRow;
 
-			sheet.SetColumnWidth(0, 10 * 256);
+			sheet.SetColumnWidth(0, 20 * 256);
 			var cell = row.CreateCell(0);
 			cell.SetCellValue("用户id");
 			cell.CellStyle = celStyle;
@@ -224,6 +328,14 @@ namespace Quge.AuctionDataExport.Winform
 			cellStyle.BorderLeft = NPOI.SS.UserModel.BorderStyle.Thin;
 			cellStyle.BorderRight = NPOI.SS.UserModel.BorderStyle.Thin;
 			cellStyle.BorderTop = NPOI.SS.UserModel.BorderStyle.Thin;
+			return cellStyle;
+		}
+
+		private HSSFCellStyle getTimeCellStyle()
+		{
+			HSSFCellStyle cellStyle = getCellStyle();
+			HSSFDataFormat format = hssfworkbook.CreateDataFormat() as HSSFDataFormat;
+			cellStyle.DataFormat = format.GetFormat("yyyy.MM.dd HH:mm:ss");
 			return cellStyle;
 		}
 	}
